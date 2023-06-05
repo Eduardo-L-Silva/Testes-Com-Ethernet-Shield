@@ -1,0 +1,77 @@
+#include <SPI.h>
+
+#include <Ethernet.h>
+
+// Define o pino ao qual o sensor de proximidade está conectado
+
+const int sensorPin = A0;
+
+// Inicializa o objeto Ethernet
+
+EthernetServer server(80);
+
+void setup() {
+
+  // Inicializa a comunicação serial
+
+  Serial.begin(9600);
+
+  // Inicializa a Ethernet Shield com o endereço MAC específico
+
+  byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+
+  Ethernet.begin(mac);
+
+  // Inicia o servidor Ethernet
+
+  server.begin();
+
+  // Imprime o endereço IP do Arduino na porta serial
+
+  Serial.print("IP address: ");
+
+  Serial.println(Ethernet.localIP());
+
+}
+
+void loop() {
+
+  // Aguarda uma conexão de cliente
+
+  EthernetClient client = server.available();
+
+  if (client) {
+
+    // Lê o valor do sensor de proximidade
+
+    int sensorValue = analogRead(sensorPin);
+
+    // Cria a resposta HTTP
+
+    client.println("HTTP/1.1 200 OK");
+
+    client.println("Content-Type: text/html");
+
+    client.println();
+
+    // Exibe o valor do sensor na página web
+
+    client.print("<html><body>");
+
+    client.print("<h1>Valor do Sensor de Proximidade:</h1>");
+
+    client.print("<p>");
+
+    client.print(sensorValue);
+
+    client.print("</p>");
+
+    client.print("</body></html>");
+
+    // Fecha a conexão
+
+    client.stop();
+
+  }
+
+}
